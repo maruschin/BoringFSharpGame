@@ -14,15 +14,14 @@ type BoringGame () as this =
     let mutable Graphics = new GraphicsDeviceManager(this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
-    let CreateActor' = CreateActor this.Content
-
-    let mutable WorldObjects = lazy ([("player", Player(Nothing),
-                                       Vector2(10.f,28.f), Vector2(32.f,32.f), false);
-                                      ("obstacle", Obstacle,
-                                       Vector2(10.f,60.f), Vector2(32.f,32.f), true);
-                                      ("", Obstacle,
-                                       Vector2(42.f, 60.f), Vector2(32.f,32.f), true);] 
-                                     |> List.map CreateActor')
+    let WorldObjects = 
+        let CreateActorWithContent = CreateActor this.Content
+        lazy (
+            [("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), false);
+             ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), true);
+             ("", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), true);] 
+            |> List.map CreateActorWithContent
+        )
 
     let DrawActor (sb:SpriteBatch) actor =
         if actor.Texture.IsSome then
@@ -32,7 +31,6 @@ type BoringGame () as this =
     override this.Initialize() =
         do spriteBatch <- new SpriteBatch(this.GraphicsDevice)
         do base.Initialize()
-        // TODO: Add your initialization logic here
         ()
 
     override this.LoadContent() =

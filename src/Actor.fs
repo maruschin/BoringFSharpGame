@@ -24,21 +24,20 @@ type WorldActor =
             Texture : Texture2D option;
             BodyType : BodyType
     }
-    member this.CurrentBounds
-        with get () = Rectangle((int this.Position.X),
-                                (int this.Position.Y),
-                                (int this.Size.X),
-                                (int this.Size.Y))
+    member this.CurrentBounds =
+        Rectangle((int this.Position.X),
+                  (int this.Position.Y),
+                  (int this.Size.X),
+                  (int this.Size.Y))
     
-    member this.DesiredBounds
-        with get () =
-            let desiredPos = match this.BodyType with
-                             | Dynamic(s) -> this.Position + s
-                             | _ -> this.Position
-            Rectangle((int desiredPos.X),
-                      (int desiredPos.Y),
-                      (int this.Size.X),
-                      (int this.Size.Y))
+    member this.DesiredBounds =
+        let desiredPos = match this.BodyType with
+                         | Dynamic(s) -> this.Position + s
+                         | _ -> this.Position
+        Rectangle((int desiredPos.X),
+                  (int desiredPos.Y),
+                  (int this.Size.X),
+                  (int this.Size.Y))
 
 let CreateActor (content:ContentManager) (textureName, actorType, position, size, isStatic) =
     let tex =
