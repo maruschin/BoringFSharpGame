@@ -39,11 +39,13 @@ type BoringGame () as this =
         ()
 
     override this.Update (gameTime) =
-        let AddGravityWithGameTime = AddGravity gameTime
+        let AddGravity' = AddGravity gameTime
         let current = WorldObjects.Value
         do WorldObjects <- lazy (
             current
-            |> List.map AddGravityWithGameTime
+            |> List.map AddGravity'
+            |> List.map AddFriction
+            |> HandleCollisions
             |> List.map ResolveVelocities
             )
         do WorldObjects.Force () |> ignore
