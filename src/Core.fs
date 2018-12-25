@@ -3,8 +3,9 @@ module Core
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
-
 open Actor
+open Physics
+
 
 type BoringGame () as this =
     inherit Game()
@@ -14,7 +15,7 @@ type BoringGame () as this =
     let mutable Graphics = new GraphicsDeviceManager(this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
-    let WorldObjects = 
+    let mutable WorldObjects = 
         let CreateActorWithContent = CreateActor this.Content
         lazy (
             [("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), false);
@@ -38,7 +39,14 @@ type BoringGame () as this =
         ()
 
     override this.Update (gameTime) =
-        // TODO: Add your update logic here
+        let AddGravityWithGameTime = AddGravity gameTime
+        let current = WorldObjects.Value
+        do WorldObjects <- lazy (
+            current
+            |> List.map AddGravityWithGameTime
+            |> List.map ResolveVelocities
+            )
+        do WorldObjects.Force () |> ignore
         ()
 
     override this.Draw (gameTime) =
