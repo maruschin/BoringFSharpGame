@@ -5,6 +5,7 @@ open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 open Actor
 open Physics
+open Input
 
 
 type BoringGame () as this =
@@ -40,9 +41,11 @@ type BoringGame () as this =
 
     override this.Update (gameTime) =
         let AddGravity' = AddGravity gameTime
+        let HandleInput' = HandleInput (Keyboard.GetState ())
         let current = WorldObjects.Value
         do WorldObjects <- lazy (
             current
+            |> List.map HandleInput'
             |> List.map AddGravity'
             |> List.map AddFriction
             |> HandleCollisions
