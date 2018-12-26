@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <Compile Include="Actor.fs" />
+    <Compile Include="Input.fs" />
+    <Compile Include="Physics.fs" />
     <Compile Include="Core.fs" />
     <Compile Include="Init.fs" />
     <Content Include="Content\obstacle.xnb">
