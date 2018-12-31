@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Animation.fs" />
     <Compile Include="Actor.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="Physics.fs" />
