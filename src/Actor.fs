@@ -3,6 +3,7 @@ module Actor
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Content
+open Animation
 
 type BodyType =
     | Static
@@ -18,11 +19,11 @@ type ActorType =
 
 type WorldActor =
     {
-            ActorType : ActorType;
-            Position : Vector2;
-            Size : Vector2;
-            Texture : Texture2D option;
-            BodyType : BodyType
+        ActorType : ActorType;
+        Position : Vector2;
+        Size : Vector2;
+        Animation : Animation option;
+        BodyType : BodyType
     }
     member this.CurrentBounds =
         Rectangle((int this.Position.X),
@@ -31,9 +32,10 @@ type WorldActor =
                   (int this.Size.Y))
     
     member this.DesiredBounds =
-        let desiredPos = match this.BodyType with
-                         | Dynamic(s) -> this.Position + s
-                         | _ -> this.Position
+        let desiredPos =
+            match this.BodyType with
+            | Dynamic(s) -> this.Position + s
+            | _ -> this.Position
         Rectangle((int desiredPos.X),
                   (int desiredPos.Y),
                   (int this.Size.X),
@@ -42,17 +44,24 @@ type WorldActor =
 let CreateActor (content:ContentManager) (textureName, actorType, position, size, isStatic) =
     let tex =
         if not (System.String.IsNullOrEmpty textureName) then
-            Some(content.Load textureName)
-        else
-            None
-
+            let tex = content.Load textureName
+            let anim = CreateAnimation tex 100
+            Some(anim)
+        else None
     let bt =
-        if isStatic then
-            Static
-        else
-            Dynamic(Vector2(0.f, 0.f))
-    { ActorType = actorType;
-      Position = position;
-      Size = size;
-      Texture = tex;
-      BodyType = bt; }
+        if isStatic then Static
+        else Dynamic(Vector2(0.f, 0.f))
+    {
+        ActorType = actorType;
+        Position = position;
+        Size = size;
+        Animation = tex;
+        BodyType = bt; 
+    }
+
+let UpdateActorAnimation gameTime (actor:WorldActor) =
+    let animation =
+        if actor.Animation.IsSome then
+            Some(UpdateAnimation gameTime actor.Animation.Value)
+        else None
+    { actor with Animation = animation }

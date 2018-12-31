@@ -12,6 +12,9 @@
     <Compile Include="Physics.fs" />
     <Compile Include="Core.fs" />
     <Compile Include="Init.fs" />
+    <Content Include="Content\animtest.xnb">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\obstacle.xnb">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
