@@ -22,7 +22,9 @@ type BoringGame () as this =
         lazy (
             [("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), false);
              ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), true);
-             ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), true);] 
+             ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), true);
+             ("bg", Obstacle, Vector2(74.f, 60.f), Vector2(32.f,32.f), true);
+             ]
             |> List.map CreateActorWithContent
         )
 

@@ -6,12 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <MonoGameContentReference Include="Content\Content.mgcb" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Animation.fs" />
     <Compile Include="Actor.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="Physics.fs" />
     <Compile Include="Core.fs" />
     <Compile Include="Init.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Content\animtest.xnb">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
