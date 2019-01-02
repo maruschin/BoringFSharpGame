@@ -1,5 +1,6 @@
 module Animation
 
+open System
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 
@@ -38,10 +39,10 @@ let UpdateAnimation (gameTime:GameTime) animation =
         else time
     { animation with CurrentFrame = newFrame;  CurrentTime = counter; }
 
-let DrawAnimation (spriteBatch:SpriteBatch) animation (position:Vector2) =
+let DrawAnimation (sb:SpriteBatch) animation (position:Vector2) =
     let rect =
-        System.Nullable(
-            Rectangle(
-                animation.CurrentFrame * FrameWidth, 0, FrameWidth, FrameHeight))
-    spriteBatch.Draw(animation.TextureStrip, position, rect, Color.White)
-        
+        Rectangle(animation.CurrentFrame * FrameWidth, 0, FrameWidth, FrameHeight)
+    sb.Draw(animation.TextureStrip, position, Nullable(rect), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.9f)
+
+let DrawTexture (sb:SpriteBatch) texture (position:Vector2) =
+    sb.Draw(texture, position, Nullable(), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.1f)

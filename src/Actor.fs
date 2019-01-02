@@ -16,13 +16,18 @@ type PlayerState =
 type ActorType =
     | Player of PlayerState
     | Obstacle
+    | BackGround
+
+type AnimationType =
+    | Animated of Animation
+    | NotAnimated of Texture2D
 
 type WorldActor =
     {
         ActorType : ActorType;
         Position : Vector2;
         Size : Vector2;
-        Animation : Animation option;
+        Animation : AnimationType;
         BodyType : BodyType
     }
     member this.CurrentBounds =
@@ -35,33 +40,30 @@ type WorldActor =
         let desiredPos =
             match this.BodyType with
             | Dynamic(s) -> this.Position + s
-            | _ -> this.Position
+            | Static -> this.Position
         Rectangle((int desiredPos.X),
                   (int desiredPos.Y),
                   (int this.Size.X),
                   (int this.Size.Y))
 
-let CreateActor (content:ContentManager) (textureName, actorType, position, size, isStatic) =
-    let tex =
-        if not (System.String.IsNullOrEmpty textureName) then
-            let tex = content.Load textureName
-            let anim = CreateAnimation tex 100
-            Some(anim)
-        else None
-    let bt =
-        if isStatic then Static
-        else Dynamic(Vector2(0.f, 0.f))
+let CreateActor (content:ContentManager) (textureName, actorType, position, size, bodyType) =
+    let tex = content.Load textureName
+    let animation =
+        match actorType with
+        | Player(s) -> Animated(CreateAnimation tex 100)
+        | Obstacle -> Animated(CreateAnimation tex 100)
+        | BackGround -> NotAnimated ( tex )
     {
         ActorType = actorType;
         Position = position;
         Size = size;
-        Animation = tex;
-        BodyType = bt; 
+        Animation = animation;
+        BodyType = bodyType;
     }
 
 let UpdateActorAnimation gameTime (actor:WorldActor) =
     let animation =
-        if actor.Animation.IsSome then
-            Some(UpdateAnimation gameTime actor.Animation.Value)
-        else None
+        match actor.Animation with
+        | Animated(animation) -> Animated(UpdateAnimation gameTime animation)
+        | NotAnimated(size) -> NotAnimated(size)
     { actor with Animation = animation }

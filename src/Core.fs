@@ -14,23 +14,36 @@ type BoringGame () as this =
 
     do this.Content.RootDirectory <- "Content"
 
-    let mutable Graphics = new GraphicsDeviceManager(this)
+    let mutable graphics = new GraphicsDeviceManager(this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
+    do
+        graphics.PreferredBackBufferWidth <- 256 * 3
+        graphics.PreferredBackBufferHeight <- 256 * 2
     let mutable WorldObjects = 
         let CreateActorWithContent = CreateActor this.Content
         lazy (
-            [("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), false);
-             ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), true);
-             ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), true);
-             ("bg", Obstacle, Vector2(74.f, 60.f), Vector2(32.f,32.f), true);
+            [
+                ("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), Dynamic(Vector2.Zero) );
+                ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), Static);
+                ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), Static);
+                ("bg", BackGround, Vector2(  0.f, 0.f), Vector2(128.f,128.f), Static);
+                ("bg", BackGround, Vector2(256.f, 0.f), Vector2(128.f,128.f), Static);
+                ("bg", BackGround, Vector2(512.f, 0.f), Vector2(128.f,128.f), Static);
+                ("bg_castle", BackGround, Vector2(  0.f, 256.f), Vector2(128.f,128.f), Static);
+                ("bg_castle", BackGround, Vector2(256.f, 256.f), Vector2(128.f,128.f), Static);
+                ("bg_castle", BackGround, Vector2(512.f, 256.f), Vector2(128.f,128.f), Static);
              ]
             |> List.map CreateActorWithContent
         )
 
     let DrawActor (sb:SpriteBatch) actor =
-        if actor.Animation.IsSome then
-            do DrawAnimation sb actor.Animation.Value actor.Position
+        let position = actor.Position
+        match actor.Animation with
+        | Animated (animation) ->
+            do DrawAnimation sb animation actor.Position
+        | NotAnimated (texture) ->
+            do DrawTexture sb texture actor.Position
         ()
 
     override this.Initialize() =
@@ -62,7 +75,7 @@ type BoringGame () as this =
     override this.Draw (gameTime) =
         do this.GraphicsDevice.Clear Color.CornflowerBlue
         let DrawActor' = DrawActor spriteBatch
-        do spriteBatch.Begin ()
+        do spriteBatch.Begin (SpriteSortMode.FrontToBack)
         WorldObjects.Value |> List.iter DrawActor'
         do spriteBatch.End ()
         ()
