@@ -1,3 +1,5 @@
+src/Content/*
+
 *.swp
 *.*~
 project.lock.json
