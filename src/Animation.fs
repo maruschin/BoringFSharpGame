@@ -4,8 +4,8 @@ open System
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 
-let FrameWidth = 32
-let FrameHeight = 32
+let FrameWidth = 72
+let FrameHeight = 97
 
 type Animation =
     {

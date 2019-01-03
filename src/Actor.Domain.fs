@@ -51,8 +51,8 @@ let CreateActor (content:ContentManager) (textureName, actorType, position, size
     let animation =
         match actorType with
         | Player(s) -> Animated(CreateAnimation tex 100)
-        | Obstacle -> Animated(CreateAnimation tex 100)
-        | BackGround -> NotAnimated ( tex )
+        | Obstacle -> NotAnimated(tex)
+        | BackGround -> NotAnimated(tex)
     {
         ActorType = actorType;
         Position = position;

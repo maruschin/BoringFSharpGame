@@ -10,9 +10,17 @@ let GetActors (content:ContentManager) =
     let CreateActorWithContent = CreateActor content
     lazy (
         [
-            ("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), Dynamic(Vector2.Zero) );
-            ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), Static);
-            ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), Static);
+            ("Player/p1_front", Player(Nothing), Vector2(10.f,28.f), Vector2(72.f,97.f), Dynamic(Vector2.Zero) );
+            ("Tiles/grassMid", Obstacle, Vector2(32.f              , 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f + 70.f       , 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  2.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  3.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  4.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  5.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  6.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  7.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  8.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
+            ("Tiles/grassMid", Obstacle, Vector2(32.f +  9.f * 70.f, 256.f), Vector2(72.f, 72.f), Static);
             ("bg", BackGround, Vector2(  0.f, 0.f), Vector2(128.f,128.f), Static);
             ("bg", BackGround, Vector2(256.f, 0.f), Vector2(128.f,128.f), Static);
             ("bg", BackGround, Vector2(512.f, 0.f), Vector2(128.f,128.f), Static);
