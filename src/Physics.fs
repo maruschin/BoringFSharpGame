@@ -1,7 +1,7 @@
 module Physics
 
 open Microsoft.Xna.Framework
-open Actor
+open ActorDomain
 
 
 let AddGravity (gameTime:GameTime) actor =

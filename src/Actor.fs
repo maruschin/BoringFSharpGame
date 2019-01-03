@@ -1,65 +1,28 @@
 module Actor
 
+open Animation
+open ActorDomain
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Content
-open Animation
 
-type BodyType =
-    | Static
-    | Dynamic of Vector2
+let GetActors (content:ContentManager) =
+    let CreateActorWithContent = CreateActor content
+    lazy (
+        [
+            ("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), Dynamic(Vector2.Zero) );
+            ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), Static);
+            ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), Static);
+            ("bg", BackGround, Vector2(  0.f, 0.f), Vector2(128.f,128.f), Static);
+            ("bg", BackGround, Vector2(256.f, 0.f), Vector2(128.f,128.f), Static);
+            ("bg", BackGround, Vector2(512.f, 0.f), Vector2(128.f,128.f), Static);
+            ("bg_castle", BackGround, Vector2(  0.f, 256.f), Vector2(128.f,128.f), Static);
+            ("bg_castle", BackGround, Vector2(256.f, 256.f), Vector2(128.f,128.f), Static);
+            ("bg_castle", BackGround, Vector2(512.f, 256.f), Vector2(128.f,128.f), Static);
+         ]
+        |> List.map CreateActorWithContent
+    )
 
-type PlayerState =
-    | Nothing
-    | Jumping
-
-type ActorType =
-    | Player of PlayerState
-    | Obstacle
-    | BackGround
-
-type AnimationType =
-    | Animated of Animation
-    | NotAnimated of Texture2D
-
-type WorldActor =
-    {
-        ActorType : ActorType;
-        Position : Vector2;
-        Size : Vector2;
-        Animation : AnimationType;
-        BodyType : BodyType
-    }
-    member this.CurrentBounds =
-        Rectangle((int this.Position.X),
-                  (int this.Position.Y),
-                  (int this.Size.X),
-                  (int this.Size.Y))
-    
-    member this.DesiredBounds =
-        let desiredPos =
-            match this.BodyType with
-            | Dynamic(s) -> this.Position + s
-            | Static -> this.Position
-        Rectangle((int desiredPos.X),
-                  (int desiredPos.Y),
-                  (int this.Size.X),
-                  (int this.Size.Y))
-
-let CreateActor (content:ContentManager) (textureName, actorType, position, size, bodyType) =
-    let tex = content.Load textureName
-    let animation =
-        match actorType with
-        | Player(s) -> Animated(CreateAnimation tex 100)
-        | Obstacle -> Animated(CreateAnimation tex 100)
-        | BackGround -> NotAnimated ( tex )
-    {
-        ActorType = actorType;
-        Position = position;
-        Size = size;
-        Animation = animation;
-        BodyType = bodyType;
-    }
 
 let UpdateActorAnimation gameTime (actor:WorldActor) =
     let animation =
@@ -67,3 +30,12 @@ let UpdateActorAnimation gameTime (actor:WorldActor) =
         | Animated(animation) -> Animated(UpdateAnimation gameTime animation)
         | NotAnimated(size) -> NotAnimated(size)
     { actor with Animation = animation }
+
+let DrawActor (sb:SpriteBatch) actor =
+    let position = actor.Position
+    match actor.Animation with
+    | Animated (animation) ->
+        do DrawAnimation sb animation actor.Position
+    | NotAnimated (texture) ->
+        do DrawTexture sb texture actor.Position
+    ()

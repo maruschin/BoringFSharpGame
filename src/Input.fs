@@ -2,7 +2,7 @@ module Input
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
-open Actor
+open ActorDomain
 
 let HandleInput (kbState:KeyboardState) actor =
     let rec HandleKeys keys (currentVelocity: Vector2, state) =
