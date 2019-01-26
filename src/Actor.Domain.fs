@@ -13,7 +13,6 @@ type ActionType =
     | Idle
     | Moving of Direction
     | Jumping
-//    | JumpingTo of Direction
 
 type AnimationType =
     | Animated of Animation

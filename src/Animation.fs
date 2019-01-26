@@ -45,4 +45,4 @@ let DrawAnimation (sb:SpriteBatch) animation (position:Vector2) =
     sb.Draw(animation.TextureStrip, position, Nullable(rect), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.9f)
 
 let DrawTexture (sb:SpriteBatch) texture (position:Vector2) =
-    sb.Draw(texture, position, Nullable(), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.1f)
+    sb.Draw(texture, position, Nullable(), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.5f)
