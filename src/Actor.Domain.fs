@@ -2,8 +2,9 @@ module ActorDomain
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
-open Microsoft.Xna.Framework.Content
-open Animation
+open AnimationDomain
+
+type MyVector2 = {X: float32; Y: float32}
 
 type Direction =
     | Forward
@@ -32,17 +33,22 @@ type Size = Size of Vector2
 
 type Position = Position of Vector2
 
-let getBounds (position:Vector2) (size:Vector2) =
+type TextureName = TextureName of string
+
+let getBounds (Position position) (Size size) =
     Rectangle((int position.X),
               (int position.Y),
               (int size.X),
               (int size.Y))
 
+let getNewPosition (Position position) (speed: Vector2) =
+    Position (position + speed)
+
 type Actor =
     {
         Type : ActorType;
-        Position : Vector2;
-        Size : Vector2;
+        Position : Position;
+        Size : Size;
         Animation : AnimationType;
         Body : BodyType;
     }
@@ -53,21 +59,4 @@ type Actor =
     member this.DesiredBounds =
         match this.Body with
         | Static -> getBounds this.Position this.Size
-        | Dynamic(s) -> getBounds (this.Position + s) this.Size
-
-let CreateActor (content:ContentManager) (actorType:ActorType) (bodyType:BodyType) (size:Vector2) (position:Vector2) (textureName) =
-    let tex = content.Load textureName
-    let animation =
-        match actorType with
-        | Player(s) -> Animated(CreateAnimation tex 100)
-        | Enemy(s) -> Animated(CreateAnimation tex 100)
-        | Obstacle -> NotAnimated(tex)
-        | Background -> NotAnimated(tex)
-
-    {
-        Type = actorType;
-        Position = position;
-        Size = size;
-        Animation = animation;
-        Body = bodyType;
-    }
+        | Dynamic s -> getBounds (getNewPosition this.Position s) this.Size

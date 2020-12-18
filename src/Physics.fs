@@ -14,9 +14,10 @@ let AddGravity (gameTime:GameTime) actor =
     | _ -> actor
 
 let ResolveVelocities actor =
+    let (Position position) = actor.Position
     match actor.Body with
     | Dynamic(s) ->
-        { actor with Position = actor.Position + s }
+        { actor with Position = Position (position + s) }
     | _ -> actor
 
 let IsActorStatic actor =

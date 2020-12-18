@@ -31,27 +31,27 @@ type BoringGame () as this =
         ()
 
     override this.Update (gameTime) =
-        let AddGravity' = AddGravity gameTime
-        let HandleInput' = HandleInput (Keyboard.GetState ())
-        let UpdateActorAnimation' = UpdateActorAnimation gameTime
+        let addGravity = AddGravity gameTime
+        let handleInput = HandleInput (Keyboard.GetState ())
+        let updateActorAnimation = UpdateActorAnimation gameTime
         let current = WorldObjects.Value
         do WorldObjects <- lazy (
             current
-            |> List.map HandleInput'
-            |> List.map AddGravity'
+            |> List.map handleInput
+            |> List.map addGravity
             |> List.map AddFriction
             |> HandleCollisions
             |> List.map ResolveVelocities
-            |> List.map UpdateActorAnimation'
+            |> List.map updateActorAnimation
             )
         do WorldObjects.Force () |> ignore
         ()
 
     override this.Draw (gameTime) =
         do this.GraphicsDevice.Clear Color.CornflowerBlue
-        let DrawActor' = DrawActor spriteBatch
+        let drawActor = DrawActor spriteBatch
         do spriteBatch.Begin (SpriteSortMode.FrontToBack)
-        WorldObjects.Value |> List.iter DrawActor'
+        WorldObjects.Value |> List.iter drawActor
         do spriteBatch.End ()
         ()
 

@@ -10,10 +10,10 @@ let HandleInput (kbState:KeyboardState) actor =
         match direction with
         | Forward ->
             if isLowVelocity then 1.f
-            else velocity + 0.1f
+            else velocity + 0.3f
         | Backward ->
             if isLowVelocity then -1.f
-            else velocity - 0.1f
+            else velocity - 0.3f
     let rec handleKeys keys (currentVelocity: Vector2, state) =
         match keys with
         | [] -> currentVelocity

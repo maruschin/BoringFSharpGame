@@ -3,20 +3,13 @@ module Animation
 open System
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
+open ActorDomain
+open AnimationDomain
 
 let FrameWidth = 72
 let FrameHeight = 97
 
-type Animation =
-    {
-        TextureStrip: Texture2D;
-        FrameCount: int;
-        CurrentFrame: int;
-        CurrentTime: int;
-        TimePerFrame: int;
-    }
-
-let CreateAnimation (texture:Texture2D) frameLength =
+let CreateAnimation (texture: Texture2D) frameLength =
     let frameCount = texture.Width / FrameWidth
     {
         TextureStrip = texture;
@@ -26,7 +19,7 @@ let CreateAnimation (texture:Texture2D) frameLength =
         TimePerFrame = frameLength;
     }
 
-let UpdateAnimation (gameTime:GameTime) animation =
+let UpdateAnimation (gameTime: GameTime) animation =
     let time = animation.CurrentTime + (int gameTime.ElapsedGameTime.TotalMilliseconds)
     let newFrame =
         if time > animation.TimePerFrame then
@@ -39,10 +32,16 @@ let UpdateAnimation (gameTime:GameTime) animation =
         else time
     { animation with CurrentFrame = newFrame;  CurrentTime = counter; }
 
-let DrawAnimation (sb:SpriteBatch) animation (position:Vector2) =
+let DrawAnimation (spriteBatch: SpriteBatch) animation (Position position) =
     let rect =
         Rectangle(animation.CurrentFrame * FrameWidth, 0, FrameWidth, FrameHeight)
-    sb.Draw(animation.TextureStrip, position, Nullable(rect), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.9f)
+    spriteBatch.Draw(animation.TextureStrip, position, Nullable(rect), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.9f)
+    ()
 
-let DrawTexture (sb:SpriteBatch) texture (position:Vector2) =
-    sb.Draw(texture, position, Nullable(), Color.White, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.5f)
+let DrawTexture (spriteBatch:SpriteBatch) texture (Position position) =
+    spriteBatch.Draw(texture, position, Nullable(Rectangle(0, 0, 72, 72)), Color.White, 0.0f, Vector2.One, Vector2.One, SpriteEffects.None, 0.5f)
+    ()
+
+let DrawBackground (spriteBatch:SpriteBatch) texture (Position position) =
+    spriteBatch.Draw(texture, position, Nullable(Rectangle(0, 0, 256, 256)), Color.White, 0.0f, Vector2.One, Vector2.One, SpriteEffects.None, 0.1f)
+    ()
