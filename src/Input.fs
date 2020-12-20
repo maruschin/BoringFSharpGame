@@ -14,30 +14,31 @@ let HandleInput (kbState:KeyboardState) actor =
         | Backward ->
             if isLowVelocity then -1.f
             else velocity - 0.3f
-    let rec handleKeys keys (currentVelocity: Vector2, state) =
+    let rec handleKeys keys (currentVelocity: Velocity, state) =
         match keys with
         | [] -> currentVelocity
         | x::xs ->
             match x with
             | Keys.Left ->
-                let newV = Vector2((newSpeed currentVelocity.X Backward), currentVelocity.Y)
+                let newV = {Velocity.X=(newSpeed currentVelocity.X Backward); Y=currentVelocity.Y}
                 handleKeys xs (newV, state)
             | Keys.Right ->
-                let newV = Vector2((newSpeed currentVelocity.X Forward), currentVelocity.Y)
+                let newV = {Velocity.X=(newSpeed currentVelocity.X Forward); Y=currentVelocity.Y}
                 handleKeys xs (newV, state)
             | Keys.Space ->
                 match state with
                 | Idle ->
-                    let newV = Vector2(currentVelocity.X, currentVelocity.Y - 3.f)
+                    let newV = {Velocity.X=currentVelocity.X; Y=currentVelocity.Y - 3.f}
                     handleKeys xs (newV, Jumping)
                 | Jumping -> handleKeys xs (currentVelocity, state)
-            | _ -> handleKeys xs (currentVelocity, state)
+                | _ -> handleKeys xs (currentVelocity, state)
+            |_ -> handleKeys xs (currentVelocity, state)
     match actor.Type with
     | Player(s) ->
         let initialVelocity =
             match actor.Body with
-            | Dynamic(v) -> v
-            | _ -> Vector2()
+            | Dynamic(velocity) -> velocity
+            | _ -> Velocity.Zero
         let velocity =
             handleKeys (kbState.GetPressedKeys() |> Array.toList) (initialVelocity, s)
         { actor with Body = Dynamic(velocity); Type = Player(Jumping) }

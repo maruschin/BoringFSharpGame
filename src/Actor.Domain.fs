@@ -4,8 +4,6 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open AnimationDomain
 
-type MyVector2 = {X: float32; Y: float32}
-
 type Direction =
     | Forward
     | Backward
@@ -25,38 +23,65 @@ type ActorType =
     | Obstacle
     | Background
 
+type Velocity =
+    { X: float32
+      Y: float32 }
+    static member FromVector2(vector2: Vector2) = { X = vector2.X; Y = vector2.Y }
+    static member Zero = { X = 0.f; Y = 0.f }
+    member this.ToVector2 = Vector2(this.X, this.Y)
+
 type BodyType =
     | Static
-    | Dynamic of Vector2
+    | Dynamic of Velocity
 
-type Size = Size of Vector2
+type Size =
+    { Width: int32
+      Height: int32 }
+    static member FromPoint(point: Point) = { Width = point.X; Height = point.Y }
+    member this.ToPoint = Point(this.Width, this.Height)
 
-type Position = Position of Vector2
+type Location =
+    { X: float32
+      Y: float32 }
+    static member FromVector2(vector2: Vector2) =
+        { Location.X = vector2.X
+          Location.Y = vector2.Y }
+
+    static member FromPoint(point: Point) =
+        let vector2 = point.ToVector2()
+        { Location.X = vector2.X
+          Location.Y = vector2.Y }
+
+    member this.ToVector2 = Vector2(this.X, this.Y)
+    member this.ToPoint = this.ToVector2.ToPoint()
+
+
+type Destination = Destination of Rectangle
+
+type Bound =
+    { Location: Location
+      Size: Size }
+    member this.GetRectangle =
+        Rectangle(this.Location.ToPoint, this.Size.ToPoint)
 
 type TextureName = TextureName of string
 
-let getBounds (Position position) (Size size) =
-    Rectangle((int position.X),
-              (int position.Y),
-              (int size.X),
-              (int size.Y))
-
-let getNewPosition (Position position) (speed: Vector2) =
-    Position (position + speed)
-
 type Actor =
-    {
-        Type : ActorType;
-        Position : Position;
-        Size : Size;
-        Animation : AnimationType;
-        Body : BodyType;
-    }
-
-    member this.CurrentBounds =
-        getBounds this.Position this.Size
+    { Type: ActorType
+      Bound: Bound
+      Animation: AnimationType
+      Body: BodyType }
+    member this.CurrentBounds = this.Bound.GetRectangle
 
     member this.DesiredBounds =
         match this.Body with
-        | Static -> getBounds this.Position this.Size
-        | Dynamic s -> getBounds (getNewPosition this.Position s) this.Size
+        | Static -> this.CurrentBounds
+        | Dynamic velocity ->
+            let newLocation =
+                Location.FromVector2(this.Bound.Location.ToVector2 + velocity.ToVector2)
+
+            let newBound =
+                { this.Bound with
+                      Location = newLocation }
+
+            newBound.GetRectangle

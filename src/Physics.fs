@@ -4,20 +4,30 @@ open Microsoft.Xna.Framework
 open ActorDomain
 
 
-let AddGravity (gameTime:GameTime) actor =
-    let ms = gameTime.ElapsedGameTime.TotalMilliseconds
-    let g = ms * 0.005
+let AddGravity (gameTime: GameTime) actor =
+    let ms =
+        gameTime.ElapsedGameTime.TotalMilliseconds
+
+    let g = float32 (ms * 0.005)
     match actor.Body with
-    | Dynamic(s) ->
-        let d = Vector2(s.X, s.Y + (float32 g))
-        { actor with Body = Dynamic(d); }
+    | Dynamic (velocity) ->
+        let newVelocity = { velocity with Y = (velocity.Y + g) }
+        { actor with
+              Body = Dynamic(newVelocity) }
     | _ -> actor
 
 let ResolveVelocities actor =
-    let (Position position) = actor.Position
     match actor.Body with
-    | Dynamic(s) ->
-        { actor with Position = Position (position + s) }
+    | Dynamic (velocity) ->
+        let newLocation =
+            Location.FromVector2
+                (actor.Bound.Location.ToVector2
+                 + velocity.ToVector2)
+
+        { actor with
+              Bound =
+                  { actor.Bound with
+                        Location = newLocation } }
     | _ -> actor
 
 let IsActorStatic actor =
@@ -26,54 +36,60 @@ let IsActorStatic actor =
     | _ -> false
 
 let PartitionWorldObjects worldObjects =
-    worldObjects
-    |> List.partition IsActorStatic
+    worldObjects |> List.partition IsActorStatic
 
 let AddFriction actor =
     match actor.Body with
-    | Dynamic(v) ->
-        let newV = Vector2(v.X*0.95f, v.Y)
-        { actor with Body = Dynamic(newV) }
+    | Dynamic (velocity) ->
+        let newVelocity =
+            { velocity with
+                  X = (velocity.X * 0.95f) }
+
+        { actor with
+              Body = Dynamic(newVelocity) }
     | _ -> actor
 
 
 let HandleCollisions worldObjects =
     let stc, dyn = PartitionWorldObjects worldObjects
 
-    let FindNewVelocity rect1 rect2 velocity =
-        let inter = Rectangle.Intersect(rect1, rect2)
-        let mutable (newVel: Vector2) = velocity
-        if inter.Height > inter.Width then
-                do newVel.X <- 0.f
-        if inter.Width > inter.Height then
-                do newVel.Y <- 0.f
-        newVel
-                    
-    let FindOptimumCollision a b = 
-        match a.Type, b.Type with
-        | Player(h), Obstacle ->
-            match a.Body, b.Body with
-            | Dynamic(s), Static ->
-                {a with Body = Dynamic((FindNewVelocity a.DesiredBounds b.CurrentBounds s)); Type = Player(Idle) }
-            | _ -> a
-        | _ -> a
+    let findNewVelocity dynamicBound staticBound velocity =
+        let inter =
+            Rectangle.Intersect(dynamicBound, staticBound)
 
-    let rec FigureCollisions (actor:Actor) (sortedActors: Actor list) =
+        match (inter.Height > inter.Width), (inter.Width > inter.Height) with
+        | true,  true  -> { Velocity.X = 0.f; Y = 0.f }
+        | true,  false -> { velocity with X = 0.f }
+        | false, true  -> { velocity with Y = 0.f }
+        | false, false -> velocity
+
+    let findOptimumCollision actor1 actor2 =
+        match actor1.Type, actor2.Type with
+        | Player (h), Obstacle ->
+            match actor1.Body, actor2.Body with
+            | Dynamic (velocity), Static ->
+                { actor1 with
+                      Body = Dynamic((findNewVelocity actor1.DesiredBounds actor2.CurrentBounds velocity))
+                      Type = Player(Idle) }
+            | _ -> actor1
+        | _ -> actor1
+
+    let rec figureCollisions (actor: Actor) (sortedActors: Actor list) =
         match sortedActors with
         | [] -> actor
-        | x::xs ->
+        | x :: xs ->
             let a =
-                if actor.DesiredBounds.Intersects x.DesiredBounds then
-                    FindOptimumCollision actor x
-                else
-                    actor
-            FigureCollisions a xs
+                if actor.DesiredBounds.Intersects x.DesiredBounds
+                then findOptimumCollision actor x
+                else actor
 
-    let rec FixCollisions (toFix:Actor list) (alreadyFixed:Actor list) =
+            figureCollisions a xs
+
+    let rec fixCollisions (toFix: Actor list) (alreadyFixed: Actor list) =
         match toFix with
         | [] -> alreadyFixed
-        | x::xs -> 
-            let a = FigureCollisions x alreadyFixed
-            FixCollisions xs (a::alreadyFixed)
+        | x :: xs ->
+            let a = figureCollisions x alreadyFixed
+            fixCollisions xs (a :: alreadyFixed)
 
-    FixCollisions dyn stc
+    fixCollisions dyn stc
