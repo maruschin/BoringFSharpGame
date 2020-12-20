@@ -2,45 +2,45 @@ module Input
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
-open Actor
+open ActorDomain
 
 let HandleInput (kbState:KeyboardState) actor =
-    let rec HandleKeys keys (currentVelocity: Vector2, state) =
+    let newSpeed velocity direction =
+        let isLowVelocity = velocity - 0.1f < -1.f
+        match direction with
+        | Forward ->
+            if isLowVelocity then 1.f
+            else velocity + 0.3f
+        | Backward ->
+            if isLowVelocity then -1.f
+            else velocity - 0.3f
+    let rec handleKeys keys (currentVelocity: Velocity, state) =
         match keys with
         | [] -> currentVelocity
         | x::xs ->
             match x with
             | Keys.Left ->
-                let newSpeed =
-                    if (currentVelocity.X - 0.1f) < -1.f then
-                        -1.f
-                    else
-                        currentVelocity.X - 0.1f
-                let newV = Vector2(newSpeed, currentVelocity.Y)
-                HandleKeys xs (newV, state)
+                let newV = {Velocity.X=(newSpeed currentVelocity.X Backward); Y=currentVelocity.Y}
+                handleKeys xs (newV, state)
             | Keys.Right ->
-                let newSpeed =
-                    if (currentVelocity.X - 0.1f) < -1.f then
-                        1.f
-                    else
-                        currentVelocity.X + 0.1f
-                let newV = Vector2(newSpeed, currentVelocity.Y)
-                HandleKeys xs (newV, state)
+                let newV = {Velocity.X=(newSpeed currentVelocity.X Forward); Y=currentVelocity.Y}
+                handleKeys xs (newV, state)
             | Keys.Space ->
                 match state with
-                | Nothing ->
-                    let newV = Vector2(currentVelocity.X, currentVelocity.Y - 3.f)
-                    HandleKeys xs (newV, Jumping)
-                | Jumping -> HandleKeys xs (currentVelocity, state)
-            | _ -> HandleKeys xs (currentVelocity, state)
-    match actor.ActorType with
+                | Idle ->
+                    let newV = {Velocity.X=currentVelocity.X; Y=currentVelocity.Y - 3.f}
+                    handleKeys xs (newV, Jumping)
+                | Jumping -> handleKeys xs (currentVelocity, state)
+                | _ -> handleKeys xs (currentVelocity, state)
+            |_ -> handleKeys xs (currentVelocity, state)
+    match actor.Type with
     | Player(s) ->
         let initialVelocity =
-            match actor.BodyType with
-            | Dynamic(v) -> v
-            | _ -> Vector2()
+            match actor.Body with
+            | Dynamic(velocity) -> velocity
+            | _ -> Velocity.Zero
         let velocity =
-            HandleKeys (kbState.GetPressedKeys() |> Array.toList) (initialVelocity, s)
-        { actor with BodyType = Dynamic(velocity); ActorType = Player(Jumping) }
+            handleKeys (kbState.GetPressedKeys() |> Array.toList) (initialVelocity, s)
+        { actor with Body = Dynamic(velocity); Type = Player(Jumping) }
     | _ -> actor
 

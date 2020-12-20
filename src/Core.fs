@@ -4,7 +4,6 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 open Actor
-open Animation
 open Physics
 open Input
 
@@ -14,22 +13,13 @@ type BoringGame () as this =
 
     do this.Content.RootDirectory <- "Content"
 
-    let mutable Graphics = new GraphicsDeviceManager(this)
+    let mutable graphics = new GraphicsDeviceManager(this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
-    let mutable WorldObjects = 
-        let CreateActorWithContent = CreateActor this.Content
-        lazy (
-            [("player", Player(Nothing), Vector2(10.f,28.f), Vector2(32.f,32.f), false);
-             ("obstacle", Obstacle, Vector2(10.f,60.f), Vector2(32.f,32.f), true);
-             ("animtest", Obstacle, Vector2(42.f, 60.f), Vector2(32.f,32.f), true);] 
-            |> List.map CreateActorWithContent
-        )
-
-    let DrawActor (sb:SpriteBatch) actor =
-        if actor.Animation.IsSome then
-            do DrawAnimation sb actor.Animation.Value actor.Position
-        ()
+    do
+        graphics.PreferredBackBufferWidth <- 256 * 3
+        graphics.PreferredBackBufferHeight <- 256 * 2
+    let mutable WorldObjects = GetActors this.Content
 
     override this.Initialize() =
         do spriteBatch <- new SpriteBatch(this.GraphicsDevice)
@@ -41,27 +31,27 @@ type BoringGame () as this =
         ()
 
     override this.Update (gameTime) =
-        let AddGravity' = AddGravity gameTime
-        let HandleInput' = HandleInput (Keyboard.GetState ())
-        let UpdateActorAnimation' = UpdateActorAnimation gameTime
+        let addGravity = AddGravity gameTime
+        let handleInput = HandleInput (Keyboard.GetState ())
+        let updateActorAnimation = UpdateActorAnimation gameTime
         let current = WorldObjects.Value
         do WorldObjects <- lazy (
             current
-            |> List.map HandleInput'
-            |> List.map AddGravity'
+            |> List.map handleInput
+            |> List.map addGravity
             |> List.map AddFriction
             |> HandleCollisions
             |> List.map ResolveVelocities
-            |> List.map UpdateActorAnimation'
+            |> List.map updateActorAnimation
             )
         do WorldObjects.Force () |> ignore
         ()
 
     override this.Draw (gameTime) =
         do this.GraphicsDevice.Clear Color.CornflowerBlue
-        let DrawActor' = DrawActor spriteBatch
-        do spriteBatch.Begin ()
-        WorldObjects.Value |> List.iter DrawActor'
+        let drawActor = DrawActor spriteBatch
+        do spriteBatch.Begin (SpriteSortMode.FrontToBack)
+        WorldObjects.Value |> List.iter drawActor
         do spriteBatch.End ()
         ()
 
